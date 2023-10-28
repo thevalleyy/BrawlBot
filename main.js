@@ -16,6 +16,7 @@ const gettime = require("./functions/gettime.js");
 // files
 const config = require("./config.json");
 const blacklist = require("./data/blacklist.json");
+const package = require("./package.json");
 
 // other
 const cooldownSet = new Set();
@@ -43,7 +44,7 @@ const client = new Discord.Client({
 });
 
 // startup log
-log(`\nLoading: ${require("./package.json").name} v${require("./package.json").version}\n`, "red", "reset", false);
+log(`\nLoading: ${package.name} v${package.version}\n`, "red", "reset", false);
 
 // SLASH-COMMANDS
 function slashCommands() {
