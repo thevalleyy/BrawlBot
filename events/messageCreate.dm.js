@@ -4,28 +4,23 @@ const config = require("../config.json");
 
 module.exports = async (client, message) => {
     if (message.channel.type !== ChannelType.DM) return;
-    if (message.author.id == "506746108345843713") return;
+    if (message.author.id == config.owner) return;
     if (message.author.bot) return;
 
     try {
-        message.client.users.fetch("506746108345843713", false).then((user) => {
+        message.client.users.fetch(config.owner, false).then((user) => {
             const embedDM = new Discord.EmbedBuilder()
-                .setTitle("Feedback oder so <:hm:907936051300012072>")
+                .setTitle("Nachricht von " + message.author.username + ":")
                 .setThumbnail(message.author.avatarURL())
-                .addFields([
-                    {
-                        name: "`" + message.author.tag + "`:",
-                        value: message.content.substring(0, 1000),
-                    },
-                ])
+                .setDescription(message.content.substring(0, 2048))
                 .setFooter({
-                    text: "Meine DMs, " + message.author.username + "s ID: " + message.author.id,
+                    text: message.author.tag + ": " + message.author.id,
                 })
                 .setTimestamp()
-                .setColor("#b51cbd");
+                .setColor(config.color.default);
 
             user.send({ embeds: [embedDM] });
-            message.react("<:checkmarkEmbed:1005146896278503597> ");
+            message.react("📨");
         });
     } catch (error) {
         client.error(error, "dm.js");

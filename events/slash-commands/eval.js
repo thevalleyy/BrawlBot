@@ -17,7 +17,7 @@ module.exports = async (client, interaction) => {
     const evalcode = interaction.options.getString("code");
 
     if (evalcode.toString().toLowerCase().includes("client.token")) {
-        interaction.reply("<:hm:907936051300012072>");
+        interaction.reply("❌");
         return;
     }
     try {
@@ -28,7 +28,7 @@ module.exports = async (client, interaction) => {
         }
 
         if (output.toLowerCase().includes(client.token.toLowerCase())) {
-            interaction.reply("<:hm:907936051300012072>");
+            interaction.reply("❌");
             return;
         }
 
@@ -36,9 +36,7 @@ module.exports = async (client, interaction) => {
             interaction.reply("```js\n" + output + "```");
         } else {
             const button1 = new Discord.ButtonBuilder().setCustomId("previousbtn").setLabel("◀️").setStyle("Secondary");
-
             const button2 = new Discord.ButtonBuilder().setCustomId("nextbtn").setLabel("▶️").setStyle("Secondary");
-
             buttonList = [button1, button2];
 
             const pages = [];

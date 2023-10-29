@@ -1,11 +1,11 @@
 const fs = require("fs");
 
 module.exports = (client) => {
-    const cmdJson = client.cmdStructure;
+    const cmdJson = client.cmds;
     let array = [];
 
-    Object.keys(cmdJson.cmds).forEach((command) => {
-        const name = cmdJson.cmds[command].data.name;
+    Object.keys(cmdJson).forEach((command) => {
+        const name = cmdJson[command].data.name;
         array.push(name.toLowerCase());
 
         client.cmdlist = array;

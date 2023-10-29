@@ -23,38 +23,23 @@ module.exports = async (client, interaction) => {
             })
             .addFields([
                 {
-                    name: "Info",
-                    value: "Hallu! Ich bins, ~~Tim~~ der Bot <:Okayge:840151989995438120>. \nFür Hilfe zu den Commands kannst du gerne ``/help command`` verwenden. \nBei Bugs bitte mir eine DM senden, danke :) \nFür mehr Infos zu mir kann ich dir ``/ping`` empfehlen. \nViel Spaß mit mir",
+                    name: "Über mich",
+                    value: "Hi! Mithilfe von mir kannst du Statistiken, Infos, Brawler, und noch viel mehr von deinem BrawlStars-Profil anzeigen. \nFür Hilfe zu den Commands kannst du gerne </help command:1167571429760442495> verwenden. \nFür mehr Infos: </ping:1167571429970161664>. \nBei Bugs bitte mir eine DM senden, danke :) \nViel Spaß!",
                     inline: true,
                 },
                 {
                     name: "​",
-                    value: "**Mitgeholfen bei der Programmierung und Umsetzung dieses Bots haben:**",
+                    value: "**Mitgeholfen bei der Umsetzung dieses Bots haben:**",
                     inline: false,
                 },
                 {
-                    name: "🧠 TomatoCake",
-                    value: "Danke für die regelmäßigen Code-Snippets, die ich von dir geklaut habe <:PeppoHuck:845379741019668481>. Sehr sympathisch mit dir zu arbeiten",
-                    inline: true,
-                },
-                {
-                    name: "👥 Alle anderen",
-                    value: "Danke an alle anderen, die mir bei der Entwicklung dieses Bots geholfen haben. \nIch hoffe, dass ihr euch auch so viel Spaß mit diesem Bot habt, wie ich ihn habe.",
+                    name: "🧠 thevalleyy",
+                    value: "Programmierung, Konzeption, Umsetzung",
                     inline: true,
                 },
                 {
                     name: "🖥️ Chaoshosting",
-                    value: "Danke für die Bereitstellung des Servers. Ich hoffe, dass euch mein Bot gefällt.",
-                    inline: true,
-                },
-                {
-                    name: "📚 Discord.JS",
-                    value: "Danke für die Bereitstellung der Library, die ich für diesen Bot nutze. \nOhne euch wäre dieser Bot nicht möglich gewesen.",
-                    inline: true,
-                },
-                {
-                    name: "🗨️ StackOverflow",
-                    value: "Danke für die Bereitstellung der Community, die mir bei Problemen immer weiterhilft. \nWie ein echter Programmiere bediene ich mich dort regelmäßig an Code, und es ist sehr großartig dass es euch gibt.",
+                    value: "Bereitstellung des Servers.",
                     inline: true,
                 },
             ]);
@@ -64,27 +49,18 @@ module.exports = async (client, interaction) => {
 
     if (interaction.options._subcommand == "command") {
         const cmd = interaction.options._hoistedOptions[0].value.toString();
-        const cmdjson = client.cmdStructure.cmds[cmd + ".js"];
+        const cmdjson = client.cmds[cmd + ".js"];
+        if (!cmdjson) return interaction.reply({ content: "Dieser Befehl existiert nicht.", ephemeral: true });
 
         const embed = new Discord.EmbedBuilder().setTitle(`/${cmd}`).setColor(config.color["default"]);
 
-        if (!cmdjson.data.description) {
-            embed.addFields([
-                {
-                    name: "Beschreibung",
-                    value: `\`\`\`Keine\`\`\``,
-                    inline: true,
-                },
-            ]);
-        } else {
-            embed.addFields([
-                {
-                    name: "Beschreibung",
-                    value: `\`\`\`${cmdjson.data.description.toString()}\`\`\``,
-                    inline: true,
-                },
-            ]);
-        }
+        embed.addFields([
+            {
+                name: "Beschreibung",
+                value: cmdjson.data.description ? `\`\`\`${cmdjson.data.description.toString()}\`\`\`` : `\`\`\`Keine\`\`\``,
+                inline: true,
+            },
+        ]);
 
         if (cmdjson.data.default_member_permissions) {
             embed.addFields([
@@ -96,13 +72,7 @@ module.exports = async (client, interaction) => {
             ]);
         }
 
-        if (!cmdjson.cooldown) {
-            var cooldown = config.cooldown_standard;
-        } else {
-            var cooldown = cmdjson.cooldown;
-        }
-
-        d = Number(cooldown);
+        d = Number(cmdjson.cooldown ? cmdjson.cooldown : config.cooldown_standard);
         var h = Math.floor(d / 3600);
         var m = Math.floor((d % 3600) / 60);
         var s = Math.floor((d % 3600) % 60);
@@ -141,23 +111,13 @@ module.exports = async (client, interaction) => {
             },
         ]);
 
-        if (cmdjson.data.dm_permission == false) {
-            embed.addFields([
-                {
-                    name: "DM-Permission",
-                    value: `<:crossEmbed:1005146898451140749>`,
-                    inline: true,
-                },
-            ]);
-        } else {
-            embed.addFields([
-                {
-                    name: "DM-Permission",
-                    value: `<:checkmarkEmbed:1005146896278503597>`,
-                    inline: true,
-                },
-            ]);
-        }
+        embed.addFields([
+            {
+                name: "DM-Permission",
+                value: cmdjson.data.dm_permission ? `<:checkmarkEmbed:1168247147033014353>` : `<:crossEmbed:1168247150174543982>`,
+                inline: true,
+            },
+        ]);
 
         fs.stat("./events/slash-commands/" + cmdjson.data.name + ".js", async (err, stats) => {
             if (err) {
@@ -202,30 +162,72 @@ module.exports = async (client, interaction) => {
                 // i dont fucking know why i have to add the code here, it just works
 
                 if (cmdjson.data.options[0]) {
-                    // TODO hier gibt es einen fehler, wenn man den command in einem verschachtelten command nutzt
+                    // there are options
+                    const optionList = [];
                     let options = "";
-                    cmdjson.data.options.map((option) => {
-                        console.log(option);
-                        options +=
-                            `${option.name}: ` +
-                            `\n\tBeschreibung: ${option.description} ` +
-                            `\n\tTyp: ${option.type
-                                .toString()
-                                .replace("11", "Anhang")
-                                .replace("10", "Nummer")
-                                .replace("9", "Rolle oder Benutzer")
-                                .replace("8", "Rolle")
-                                .replace("7", "Kanal")
-                                .replace("6", "Benutzer")
-                                .replace("5", "Boolescher Wert")
-                                .replace("4", "Integer")
-                                .replace("3", "Zeichenfolge")
-                                .replace("2", "SubcommandGroup")
-                                .replace("1", "Subcommand")} ` +
-                            `\n\tErforderlich: ${option.required ? "Ja" : "Nein"} ` +
-                            `${option.choices ? "\n\tAuswahlmöglichkeiten: Ja" : ""} ` +
-                            `${option.autocomplete ? "\n\tAutocomplete: Ja" : ""} \n\n`;
-                    });
+
+                    if (cmdjson.data.options[0].options) {
+                        // this is a nested command
+                        for (let i = 0; i < cmdjson.data.options.length; i++) {
+                            const option = cmdjson.data.options[i];
+                            optionList.push(option);
+                        }
+
+                        optionList.map((option) => {
+                            options += `/${cmdjson.data.name} ${option.name}: ` + `\n\tBeschreibung: ${option.description} `;
+
+                            if (option.options[0]) {
+                                option.options.map((subOption) => {
+                                    options +=
+                                        `\n\t${subOption.name}: ` +
+                                        `\n\t\tBeschreibung: ${subOption.description} ` +
+                                        `\n\t\tTyp: ${subOption.type
+                                            .toString()
+                                            .replace("11", "Anhang")
+                                            .replace("10", "Nummer")
+                                            .replace("9", "Rolle oder Benutzer")
+                                            .replace("8", "Rolle")
+                                            .replace("7", "Kanal")
+                                            .replace("6", "Benutzer")
+                                            .replace("5", "Boolescher Wert")
+                                            .replace("4", "Integer")
+                                            .replace("3", "Zeichenfolge")
+                                            .replace("2", "SubcommandGroup")
+                                            .replace("1", "Subcommand")} ` +
+                                        `\n\t\tErforderlich: ${subOption.required ? "Ja" : "Nein"} ` +
+                                        `${subOption.choices ? "\n\t\tAuswahlmöglichkeiten: Ja" : ""} ` +
+                                        `${subOption.autocomplete ? "\n\t\tAutocomplete: Ja" : ""} \n\n`;
+                                });
+                            }
+                        });
+                    } else {
+                        for (let i = 0; i < cmdjson.data.options.length; i++) {
+                            const option = cmdjson.data.options[i];
+                            optionList.push(option);
+                        }
+
+                        optionList.map((option) => {
+                            options +=
+                                `${option.name}: ` +
+                                `\n\tBeschreibung: ${option.description} ` +
+                                `\n\tTyp: ${option.type
+                                    .toString()
+                                    .replace("11", "Anhang")
+                                    .replace("10", "Nummer")
+                                    .replace("9", "Rolle oder Benutzer")
+                                    .replace("8", "Rolle")
+                                    .replace("7", "Kanal")
+                                    .replace("6", "Benutzer")
+                                    .replace("5", "Boolescher Wert")
+                                    .replace("4", "Integer")
+                                    .replace("3", "Zeichenfolge")
+                                    .replace("2", "SubcommandGroup")
+                                    .replace("1", "Subcommand")} ` +
+                                `\n\tErforderlich: ${option.required ? "Ja" : "Nein"} ` +
+                                `${option.choices ? "\n\tAuswahlmöglichkeiten: Ja" : ""} ` +
+                                `${option.autocomplete ? "\n\tAutocomplete: Ja" : ""} \n\n`;
+                        });
+                    }
 
                     embed.addFields([
                         {

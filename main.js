@@ -30,28 +30,21 @@ const client = new Discord.Client({
     },
     intents: [
         Discord.GatewayIntentBits.Guilds,
+        Discord.GatewayIntentBits.GuildMessages,
         Discord.GatewayIntentBits.GuildMembers,
         Discord.GatewayIntentBits.GuildBans,
         Discord.GatewayIntentBits.GuildEmojisAndStickers,
-        Discord.GatewayIntentBits.GuildIntegrations,
-        Discord.GatewayIntentBits.GuildWebhooks,
-        Discord.GatewayIntentBits.GuildInvites,
-        Discord.GatewayIntentBits.GuildVoiceStates,
         Discord.GatewayIntentBits.GuildMessageReactions,
         Discord.GatewayIntentBits.DirectMessages,
         Discord.GatewayIntentBits.DirectMessageReactions,
     ],
 });
 
-// startup log
-log(`\nLoading: ${package.name} v${package.version}\n`, "red", "reset", false);
-
 // SLASH-COMMANDS
 function slashCommands() {
-    let cmdJson = { cmds: {} };
-    log("Registering: Slash-Commands", "yellow", "reset", false);
-
+    let cmds = {};
     const commands = [];
+
     try {
         var commandFiles = fs.readdirSync("./scommands");
     } catch (err) {
@@ -62,14 +55,14 @@ function slashCommands() {
         if (!file.toLowerCase().endsWith(".js")) {
             log(`Skipping: ${file}`, "green", "reset", true);
         } else {
-            cmdJson.cmds[file] = require(`./scommands/${file}`);
+            cmds[file] = require(`./scommands/${file}`);
             const command = require(`./scommands/${file}`);
             commands.push(command.data.toJSON());
             log(`Loading: ${file}`, "cyan", "reset", true);
         }
     }
 
-    client.cmdStructure = cmdJson;
+    client.cmds = cmds;
 
     const rest = new REST({ version: "10" }).setToken(config.token);
 
@@ -86,9 +79,8 @@ function slashCommands() {
                 body: commands,
             });
 
-            log(`Loaded: ${data.length} Slash-Commands\n`, "blue", "reset", false);
-
-            log("Started: Bot", "red", "reset", false);
+            log(`Loaded: ${data.length} Slash-Commands`, "blue", "reset", false);
+            log("Start complete!\n", "red", "reset", false);
         } catch (error) {
             client.error(error, "main.js");
         }
@@ -99,37 +91,35 @@ function slashCommands() {
 
 // EVENTS
 function events() {
-    log("\nGrouping: Events", "yellow", "reset", false);
-    let eventJson = { event: {} };
+    let events = {};
 
-    fs.readdir(path.join(__dirname, "events"), function (err, files) {
+    fs.readdir(path.join(__dirname, "events"), async function (err, files) {
         if (err) {
             return log("[" + gettime() + "] » Error: Unable to scan directory: " + err, "red", "reset", true);
         }
-        files.forEach(function (file) {
+        await files.forEach(function (file) {
             if (!file.toLowerCase().endsWith(".js")) {
                 log(`Skipping: ${file}`, "green", "reset", true);
                 return;
             }
 
             const eventName = file.split(".")[0];
-            if (!eventJson.event[eventName]) {
-                eventJson.event[eventName] = [];
+            if (!events[eventName]) {
+                events[eventName] = [];
                 log(`Grouping: ${eventName}`, "cyan", "reset", true);
             }
-            eventJson.event[eventName].push(file);
+            events[eventName].push(file);
 
-            log(`Scanned: ${file}`, "cyan", "reset", true);
+            log(`\t${file}`, "cyan", "reset", true);
         });
 
-        client.events = eventJson;
-
+        client.events = events;
         log("\nRegistering: Events", "yellow", "reset", false);
 
-        Object.keys(eventJson.event).forEach((event) => {
+        await Object.keys(events).forEach((event) => {
             log("Listening: " + event, "cyan", "reset", true);
             if (event == "ready") {
-                eventJson.event[event].forEach((file) => {
+                events[event].forEach((file) => {
                     require(`./events/${file}`)(client);
                 });
                 return;
@@ -160,7 +150,7 @@ function events() {
                             return;
                         }
 
-                        eventJson.event[event].forEach((file) => {
+                        events[event].forEach((file) => {
                             const eventFile = require(`./events/${file}`);
                             eventFile(client, ...args);
                         });
@@ -171,14 +161,20 @@ function events() {
             });
         });
 
-        log(`Loaded: ${files.filter((file) => file.toLowerCase().endsWith(".js")).length} Events\n`, "blue", "reset", false);
+        log(`\nLoaded: ${files.filter((file) => file.toLowerCase().endsWith(".js")).length} Events`, "blue", "reset", false);
     });
 }
 
 // start all handlers
 client.on("ready", async () => {
-    slashCommands();
-    events();
+    // startup log
+    log(`\nLoading: ${package.name} v${package.version}\n`, "red", "reset", false);
+
+    log("Registering: Slash-Commands", "yellow", "reset", false);
+    await slashCommands();
+
+    log("\nGrouping: Events", "yellow", "reset", false);
+    await events();
 });
 
 // slash command handler
