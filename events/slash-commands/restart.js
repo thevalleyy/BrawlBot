@@ -1,35 +1,32 @@
 const config = require("../../config.json");
 const process = require("process");
 const { spawn } = require("child_process");
+const psTree = require("ps-tree");
 
 module.exports = (client, interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
-    if (interaction.user.id != config.owner) {
-        interaction.reply({
+    if (interaction.user.id != config.owner)
+        return interaction.reply({
             content: "Du hast keine Berechtigung, diesen Befehl auszuführen.",
             ephemeral: true,
         });
-        return;
-    }
 
-    (function main() {
-        if (process.env.process_restarting) {
-            delete process.env.process_restarting;
-            // Give old process one second to shut down before continuing ...
-            setTimeout(main, 1000);
-            return;
-        }
+    interaction.reply("Neustart wird ausgeführt...").then(() => {
+        // restart script
 
-        // Restart process ...
-        spawn(process.argv[0], process.argv.slice(1), {
-            env: { process_restarting: 1 },
-            stdio: "ignore",
+        const commandToRestart = "npm run start";
+
+        const child = spawn(commandToRestart, {
+            shell: true,
             detached: true,
-        }).unref();
-    })();
+            stdio: "ignore",
+        });
 
-    process.exit(1);
+        // Unreference the child process to allow the current process to exit
+        child.unref();
 
-    // todo: bot einfach crashen lassen
+        // Exit the current process
+        process.exit();
+    });
 };

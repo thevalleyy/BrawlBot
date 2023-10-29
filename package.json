@@ -16,7 +16,6 @@
         "mysql2": "^3.6.2",
         "node-fetch": "^3.3.2",
         "npm-check-updates": "^16.14.6",
-        "string-progressbar": "^1.0.4",
-        "tweetnacl": "^1.0.3"
+        "ps-tree": "^1.2.0"
     }
 }

@@ -1,4 +1,5 @@
 const Discord = require("discord.js");
+const config = require("../../config.json");
 
 module.exports = (client, interaction) => {
     if (!interaction.isChatInputCommand()) return;
@@ -19,18 +20,14 @@ module.exports = (client, interaction) => {
 
     const iconurl = interaction.guild.iconURL();
 
-    const prePingEmbed = new Discord.EmbedBuilder()
-        .setTitle("...")
-        .setColor("#36393f");
+    const prePingEmbed = new Discord.EmbedBuilder().setTitle("...").setColor(config.color.default);
     interaction.reply({ embeds: [prePingEmbed] }).then((m) => {
         const pingEmbed = new Discord.EmbedBuilder()
             .setTitle("Bot-Info")
             .addFields([
                 {
                     name: "Bot:",
-                    value: `\`${(Date.now() - interaction.createdTimestamp)
-                        .toString()
-                        .replace("-", "")}\`ms`,
+                    value: `\`${(Date.now() - interaction.createdTimestamp).toString().replace("-", "")}\`ms`,
                     inline: true,
                 },
                 {
@@ -44,7 +41,7 @@ module.exports = (client, interaction) => {
 
             .setFooter({ text: interaction.guild.name, iconURL: iconurl })
             .setTimestamp()
-            .setColor("#36393f");
+            .setColor(config.color.default);
         interaction.editReply({ embeds: [pingEmbed] });
     });
 };
