@@ -18,14 +18,12 @@ module.exports = async (client, interaction) => {
     var activity = interaction.options.getString("activity");
 
     if ((!text || activity) && presence == "streaming")
-        return interaction.reply(
-            "Um `streaming` verwenden zu können, muss ein Text angegeben werden, und es darf keine Aktivität ausgewählt werden."
-        );
+        return interaction.reply("Um `streaming` verwenden zu können, muss ein Text angegeben werden und es darf keine Aktivität ausgewählt werden.");
     if ((text || activity) && presence == "invisible")
         return interaction.reply(
-            "Um `invisible` verwenden zu können, darf kein Text angegeben werden, und es darf keine Aktivität ausgewählt werden."
+            "Um `invisible` verwenden zu können, darf kein Text angegeben werden und es darf keine Aktivität ausgewählt werden."
         );
-    await interaction.reply("Status wird geändert...");
+    await interaction.reply({ content: "Status wird geändert...", ephemeral: true });
 
     try {
         if (presence == "invisible") {
@@ -99,9 +97,9 @@ module.exports = async (client, interaction) => {
         }
     } catch (error) {
         client.error(error, "status.js");
-        interaction.editReply("Es ist ein Fehler aufgetreten");
+        interaction.editReply({ content: "Es ist ein Fehler aufgetreten.", ephemeral: true });
         return;
     }
 
-    interaction.editReply("Status wurde geändert.");
+    interaction.editReply({ content: "Status wurde geändert.", ephemeral: true });
 };

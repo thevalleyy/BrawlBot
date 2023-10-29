@@ -1,11 +1,6 @@
 const config = require("../config.json");
 
-const {
-    ActionRowBuilder,
-    Message,
-    EmbedBuilder,
-    ButtonBuilder,
-} = require("discord.js");
+const { ActionRowBuilder, Message, EmbedBuilder, ButtonBuilder } = require("discord.js");
 
 /**
  * Creates a pagination embed
@@ -18,17 +13,14 @@ const {
 const paginationEmbed = async (
     interaction,
     pages,
-    buttonList,
+    buttonList, //TODO: buttonlist fest einbauen, damit sie nich immer angegeben werden muss
     timeout = 120000
 ) => {
-    if (!interaction && !interaction.channel)
-        throw new Error("Channel is inaccessible.");
+    if (!interaction && !interaction.channel) throw new Error("Channel is inaccessible.");
     if (!pages) throw new Error("Pages are not given.");
     if (!buttonList) throw new Error("Buttons are not given.");
     if (buttonList[0].style === "LINK" || buttonList[1].style === "LINK")
-        throw new Error(
-            "Link buttons are not supported with discordjs-button-pagination"
-        );
+        throw new Error("Link buttons are not supported with discordjs-button-pagination");
     if (buttonList.length !== 2) throw new Error("Need two buttons.");
 
     let page = 0;
@@ -49,9 +41,7 @@ const paginationEmbed = async (
         components: [row],
     });
 
-    const filter = (i) =>
-        i.custom_id === buttonList[0].custom_id ||
-        i.custom_id === buttonList[1].custom_id;
+    const filter = (i) => i.custom_id === buttonList[0].custom_id || i.custom_id === buttonList[1].custom_id;
 
     const collector = await curPage.createMessageComponentCollector({
         filter,
@@ -59,8 +49,7 @@ const paginationEmbed = async (
     });
 
     collector.on("collect", async (i) => {
-        if (interaction.user.id !== i.user.id && i.user.id !== config.owner)
-            return i.deferUpdate();
+        if (interaction.user.id !== i.user.id && i.user.id !== config.owner) return i.deferUpdate();
 
         switch (i.customId) {
             case buttonList[0].data.custom_id:
@@ -90,10 +79,7 @@ const paginationEmbed = async (
             .then((reply) => {
                 if (!reply) return console.log("Reply not found");
 
-                const disabledRow = new ActionRowBuilder().addComponents(
-                    buttonList[0].setDisabled(true),
-                    buttonList[1].setDisabled(true)
-                );
+                const disabledRow = new ActionRowBuilder().addComponents(buttonList[0].setDisabled(true), buttonList[1].setDisabled(true));
                 interaction.editReply({
                     embeds: [
                         pages[page].setFooter({

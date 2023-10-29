@@ -48,10 +48,6 @@ function log(text, style = "reset", background = "reset", showTime = true) {
         throw "Invalid background style";
     }
 
-    console.log(
-        `${bgColor}${
-            showTime == true ? `[${gettime()}] » ` : ""
-        }${fgColor}${text}${styles.text.reset}`
-    );
+    console.log(`${bgColor}${showTime == true ? `[${gettime()}] » ` : ""}${fgColor}${text}${styles.text.reset}`);
 }
 module.exports = log;
