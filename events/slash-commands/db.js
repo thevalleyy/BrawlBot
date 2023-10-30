@@ -33,6 +33,6 @@ module.exports = async (client, interaction) => {
         });
     } catch (e) {
         client.error(e, "db.js");
-        interaction.reply("Fehler beim Ausführen des Statements");
+        interaction.reply({ content: "Fehler beim Ausführen des Ausdrucks.", ephemeral: true });
     }
 };

@@ -1,7 +1,6 @@
 const config = require("../../config.json");
 const process = require("process");
 const { spawn } = require("child_process");
-const psTree = require("ps-tree");
 
 module.exports = (client, interaction) => {
     if (!interaction.isChatInputCommand()) return;

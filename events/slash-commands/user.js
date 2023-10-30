@@ -70,7 +70,6 @@ module.exports = async (client, interaction) => {
             },
         ]);
 
-    console.log(user.flags.toArray());
     if (user.hexAccentColor) {
         embed.addFields([
             {
@@ -81,6 +80,8 @@ module.exports = async (client, interaction) => {
         ]);
 
         embed.setColor(user.hexAccentColor);
+    } else {
+        embed.setColor(config.color.default);
     }
 
     if (user.bannerURL()) {

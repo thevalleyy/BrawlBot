@@ -66,7 +66,7 @@ module.exports = async (client, interaction) => {
             embed.addFields([
                 {
                     name: "Berechtigungen",
-                    value: `\`\`\`${new Discord.PermissionsBitField(cmdjson.data.default_member_permissions.toString()).toArray()}\`\`\``,
+                    value: `\`\`\`${new Discord.PermissionsBitField(cmdjson.data.default_member_permissions.toString()).toArray().join(", ")}\`\`\``,
                     inline: true,
                 },
             ]);
